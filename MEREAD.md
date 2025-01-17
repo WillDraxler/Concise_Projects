@@ -1,0 +1,1 @@
+General storage for small things that are easily contained to one folder

@@ -1,0 +1,134 @@
+---
+title: "saved_code_chunks"
+output: html_document
+---
+
+```{r line-break-code-still-slightly-bugged}
+chr_deselect <- function (quote_text){
+  if (length(quote_text) > 40) {
+    final_output <<- quote_text}
+  else {
+    if (str_sub(temp_select, chr_end, chr_end) == " "){
+      final_output <<- glue(final_output, "\n", temp_select)
+    } else {
+      chr_end <<- chr_end - 1
+      temp_select <<- str_sub(quote_text, chr_start, chr_end)
+      chr_deselect(quote_text)
+    }
+  }
+}
+
+line_break <- function (quote_text) {
+  temp_select <<- str_sub(quote_text, chr_start, chr_end)
+  chr_deselect(quote_text)
+  end_select <<- str_sub(quote_text, (chr_end + 1), -1)
+  if (str_length(end_select) >= 40) {
+    line_break(end_select)
+  } else {
+    final_output <<- glue(final_output, "\n", end_select)
+  }
+}
+
+run_line_break <- function (input_text) {
+  final_output <<- ""
+  chr_start <<- 1
+  chr_end <<- 40
+  line_break(input_text)
+}
+
+```
+
+
+```{r data-weather-tidying}
+data_2023 <- read_csv("2023_all_season_data.csv")
+mdr_notes_2023 <- read_csv("mdr_notes.csv")
+data_2023 <- data_2023 %>% 
+  mutate(wind_speed_mph = wind_speed * 2.237) %>% 
+  mutate(air_temp_f = (air_temp * 1.8) + 32) %>% 
+  select(-wind_speed, -air_temp) %>% 
+  mutate(date_full = str_c(year, "/", month, "/", day, " ", hour, ":00:00")) %>% 
+  mutate(date_full = ymd_hms(date_full)) %>% 
+  select(wind_speed_mph, air_temp_f, date_full) %>% 
+  filter(row_number() != 429)
+
+
+max_temp_table <- data_2023 %>% 
+  group_by(date(date_full)) %>% 
+  filter(air_temp_f == max(air_temp_f)) %>% 
+  mutate(max_daily_temp_f = air_temp_f) %>% 
+  mutate(day_date = date(date_full)) %>% 
+  select(max_daily_temp_f, day_date)
+
+min_temp_table <- data_2023 %>% 
+  group_by(date(date_full)) %>%
+  mutate(avg_air_f = mean(air_temp_f)) %>%
+  filter(air_temp_f == min(air_temp_f)) %>% 
+  mutate(min_daily_temp_f = air_temp_f) %>% 
+  mutate(day_date = date(date_full)) %>% 
+  select(min_daily_temp_f, day_date, avg_air_f)
+
+min_wind_chill_table <- data_2023 %>% 
+  group_by(date(date_full)) %>% 
+  mutate(avg_wind_mph = mean(wind_speed_mph, na.rm = TRUE)) %>% 
+  mutate(wind_chill = ((((0.4275 * air_temp_f) - 35.75) * (wind_speed_mph^0.16)) + (0.6215 * air_temp_f) + 35.74)) %>%
+  filter(wind_chill == min(wind_chill)) %>% 
+  mutate(min_wind_chill = wind_chill) %>% 
+  mutate(day_date = date(date_full)) %>% 
+  select(min_wind_chill, day_date, avg_wind_mph)
+
+
+test <- mdr_notes_2023 %>%
+  left_join(max_temp_table, by = "day_date") %>%
+  left_join(min_temp_table, by = "day_date") %>% 
+  left_join(min_wind_chill_table, by = "day_date") %>% 
+  group_by(day_date) %>%
+  select(day_date, min_daily_temp_f, max_daily_temp_f, avg_air_f, avg_wind_mph, min_wind_chill, notes) %>% 
+  distinct() %>% 
+  write_csv("mdr_2023_season_weather.csv")
+
+```
+
+
+```{r tide-height-scrape}
+
+filter(((row_number() - (number to select a given column)) %% 15) == 0)
+
+
+scrape_low_tide <- function(month, year){
+
+url <- str_c("https://www.usharbors.com/harbor/maine/bar-harbor-me/tides/?tide=", year, "-", month, "#monthly-tide-chart")
+
+page <- read_html(url)
+
+all_tide_data <- page %>% 
+  html_nodes("td") %>% 
+  html_text() %>% 
+  as.tibble()
+
+day <- all_tide_data %>% 
+  filter(((row_number() - 1) %% 15) == 0)
+
+low_am <- all_tide_data %>% 
+  filter(((row_number() - 8) %% 15) == 0)
+
+low_pm <- all_tide_data %>% 
+  filter(((row_number() - 10) %% 15) == 0)
+
+am_df <- data.frame(day, low_am) %>% 
+  mutate(low_tide_date = dmy(str_c(value, "-", month, "-", year)))
+pm_df <- data.frame(day, low_pm) %>% 
+  mutate(low_tide_date = dmy(str_c(value, "-", month, "-", year)))
+if (exists("low_df")) {
+  low_df <<- bind_rows(low_df, am_df, pm_df) %>% 
+  select(-value)
+} else {
+low_df <<- bind_rows(am_df, pm_df)
+  }
+}
+
+for (x in 1:12) {
+  scrape_low_tide(x, 2023)
+}
+
+```
+
