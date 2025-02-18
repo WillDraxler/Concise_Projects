@@ -8,7 +8,7 @@ library(tidyverse)
 library(magick)
 library(grid)
 library(glue)
-data <- read_csv("data/33.csv")
+data <- read_csv("data/35.csv")
 ```
 
 
