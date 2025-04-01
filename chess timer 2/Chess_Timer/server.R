@@ -11,7 +11,9 @@ function(input, output) {
   
   output$downloadData <- downloadHandler(
     
-    filename = "photos.zip",
+    filename = glue("chess_photos_", 
+                    as.integer(as.Date(Sys.Date())) - 20178, 
+                    ".zip"),
     
     content = function(file){
       temp_directory <- file.path(tempdir(), as.integer(Sys.time()))
@@ -59,10 +61,10 @@ function(input, output) {
         vis <- image_annotate(image_blank(1000,1000, input$back_color), 
                                     run_line_break(data[quote_num, 1]), 
                                     gravity = "Center", 
-                                    font = "Georgia", 
+                                    font = "Times New Roman", 
                                     size = 40, 
                                     color = input$text_color)
-        image_write(vis, file.path(temp_directory, glue("output/image_", quote_num, ".jpg")), quality = 90)
+        image_write(vis, file.path(temp_directory, glue("image_", quote_num, ".jpg")), quality = 90)
       }
       
       for (x in 1:10) {
