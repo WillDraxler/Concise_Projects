@@ -1,0 +1,12 @@
+name: Operation_Chess_Timer
+title: Operation_Chess_Timer
+username: weopkb-will-draxler
+account: weopkb-will-draxler
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14384697
+bundleId: 10032309
+url: https://weopkb-will-draxler.shinyapps.io/Operation_Chess_Timer/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

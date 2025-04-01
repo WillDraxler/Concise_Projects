@@ -8,7 +8,7 @@ library(tidyverse)
 library(magick)
 library(grid)
 library(glue)
-data <- read_csv("data/35.csv")
+data <- read_csv("data/41.csv")
 ```
 
 
@@ -52,7 +52,7 @@ run_line_break <- function (input_text) {
 ```{r}
 
 generate_images <- function (quote_num) {
-vis <- image_annotate(image_blank(1000,1000, "#002d19"), run_line_break(data[quote_num, 1]), gravity = "Center", font = "Georgia", size = 40, color = "white") 
+vis <- image_annotate(image_blank(1000,1000, "#8c0450"), run_line_break(data[quote_num, 1]), gravity = "Center", font = "Georgia", size = 40, color = "white") 
 output_name <- glue("output/image_", quote_num, ".jpg")
 image_write(vis, path = output_name, quality = 90)
 }

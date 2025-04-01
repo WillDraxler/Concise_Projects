@@ -1,0 +1,345 @@
+---
+title: "FRB_OF"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(gganimate)
+```
+
+
+```{r}
+raw_1871_1872 <- read_xlsx("freeland_bunker/data/journal_1871_1872.xlsx")
+raw_1873 <- read_xlsx("freeland_bunker/data/journal_1873.xlsx")
+raw_1874 <- read_xlsx("freeland_bunker/data/journal_1874.xlsx")
+raw_1875 <- read_xlsx("freeland_bunker/data/journal_1875.xlsx")
+raw_1876 <- read_xlsx("freeland_bunker/data/journal_1876.xlsx")
+raw_1877 <- read_xlsx("freeland_bunker/data/journal_1877.xlsx")
+raw_1878 <- read_xlsx("freeland_bunker/data/journal_1878.xlsx")
+raw_1879 <- read_xlsx("freeland_bunker/data/journal_1879.xlsx")
+raw_1880 <- read_xlsx("freeland_bunker/data/journal_1880.xlsx")
+raw_1881 <- read_xlsx("freeland_bunker/data/journal_1881.xlsx")
+raw_1882 <- read_xlsx("freeland_bunker/data/journal_1882.xlsx")
+raw_1883 <- read_xlsx("freeland_bunker/data/journal_1883.xlsx")
+raw_1884 <- read_xlsx("freeland_bunker/data/journal_1884.xlsx")
+raw_1885 <- read_xlsx("freeland_bunker/data/journal_1885.xlsx")
+raw_1886 <- read_xlsx("freeland_bunker/data/journal_1886.xlsx")
+raw_1887 <- read_xlsx("freeland_bunker/data/journal_1887.xlsx")
+raw_1888 <- read_xlsx("freeland_bunker/data/journal_1888.xlsx")
+raw_1889 <- read_xlsx("freeland_bunker/data/journal_1889.xlsx")
+raw_1890 <- read_xlsx("freeland_bunker/data/journal_1890.xlsx")
+raw_1891 <- read_xlsx("freeland_bunker/data/journal_1891.xlsx")
+raw_1892 <- read_xlsx("freeland_bunker/data/journal_1892.xlsx")
+raw_1893 <- read_xlsx("freeland_bunker/data/journal_1893.xlsx")
+raw_1894 <- read_xlsx("freeland_bunker/data/journal_1894.xlsx")
+raw_1895 <- read_xlsx("freeland_bunker/data/journal_1895.xlsx")
+raw_1896 <- read_xlsx("freeland_bunker/data/journal_1896.xlsx")
+
+all_years <- bind_rows(raw_1871_1872, raw_1873, raw_1874, raw_1875, raw_1876, raw_1877, raw_1878, raw_1879, raw_1880, raw_1881, raw_1882, raw_1883, raw_1884, raw_1885, raw_1886, raw_1887, raw_1888, raw_1888, raw_1889, raw_1890, raw_1891, raw_1892, raw_1893, raw_1894, raw_1895, raw_1896)
+
+all_years <- all_years %>% 
+  filter(is.na(journal_entry) == F)
+```
+
+
+```{r}
+all_years %>% 
+  count(month) %>% 
+  ggplot(aes(fct_reorder(month, n), n)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 0.5))
+
+```
+
+
+```{r}
+all_years %>% 
+  count(item, quantity, unit, sort = T)
+```
+
+```{r}
+all_years %>% 
+  count(wind_direction_am, month, sort = T) %>%
+  filter(str_detect(wind_direction_am, ",") == F) %>% 
+  mutate(wind_direction_am = case_when(wind_direction_am == "WS" ~ "SW",
+                                       wind_direction_am == "WN" ~ "NW",
+                                       wind_direction_am == "w" ~ "W",
+                                       wind_direction_am == "SWW" ~ "WSW",
+                                       wind_direction_am == "Southerly" ~ "S",
+                                       wind_direction_am == "South" ~ "S",
+                                       wind_direction_am == "south" ~ "S",
+                                       wind_direction_am == "SEE" ~ "ESE",
+                                       wind_direction_am == "NWW" ~ "WNW",
+                                       wind_direction_am == "NWN" ~ "NNW",
+                                       wind_direction_am == "North" ~ "N",
+                                       wind_direction_am == "NN" ~ "N",
+                                       wind_direction_am == "NEE" ~ "ENE",
+                                       wind_direction_am == "ES" ~ "SE",
+                                       wind_direction_am == "EN" ~ "NE",
+                                       wind_direction_am == "calm" ~ NA,
+                                       wind_direction_am == "NA" ~ NA,
+                                       wind_direction_am == "breezed up" ~ NA,
+                                       wind_direction_am == "WWN" ~ "WNW",
+                                       wind_direction_am == "WS" ~ "SW",
+                                       wind_direction_am == "WNE" ~ NA,
+                                       wind_direction_am == "NEbN" ~ "NE",
+                                       TRUE ~ wind_direction_am)) %>% 
+  filter(is.na(wind_direction_am) == F) %>% 
+  mutate(wind_direction_am = factor(wind_direction_am, levels = c("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"))) %>% 
+  filter(wind_direction_am != "NA") %>% 
+  ggplot(aes(as.factor(wind_direction_am), n)) +
+  geom_col() +
+  coord_polar() +
+  facet_wrap(~ factor(month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")))
+```
+
+```{r}
+all_years %>% 
+  mutate(date_mdy = mdy(date_mdy)) %>% 
+  mutate(new_month = month(date_mdy)) %>% 
+  count(wind_direction_am, new_month, sort = T) %>%
+  filter(str_detect(wind_direction_am, ",") == F) %>% 
+  mutate(wind_direction_am = case_when(wind_direction_am == "WS" ~ "SW",
+                                       wind_direction_am == "WN" ~ "NW",
+                                       wind_direction_am == "w" ~ "W",
+                                       wind_direction_am == "SWW" ~ "WSW",
+                                       wind_direction_am == "Southerly" ~ "S",
+                                       wind_direction_am == "South" ~ "S",
+                                       wind_direction_am == "south" ~ "S",
+                                       wind_direction_am == "SEE" ~ "ESE",
+                                       wind_direction_am == "NWW" ~ "WNW",
+                                       wind_direction_am == "NWN" ~ "NNW",
+                                       wind_direction_am == "North" ~ "N",
+                                       wind_direction_am == "NN" ~ "N",
+                                       wind_direction_am == "NEE" ~ "ENE",
+                                       wind_direction_am == "ES" ~ "SE",
+                                       wind_direction_am == "EN" ~ "NE",
+                                       wind_direction_am == "calm" ~ NA,
+                                       wind_direction_am == "NA" ~ NA,
+                                       wind_direction_am == "breezed up" ~ NA,
+                                       wind_direction_am == "WWN" ~ "WNW",
+                                       wind_direction_am == "WS" ~ "SW",
+                                       wind_direction_am == "WNE" ~ NA,
+                                       wind_direction_am == "NEbN" ~ "SSE", #Done to make visualization even, not for analyis
+                                       TRUE ~ wind_direction_am)) %>% 
+  filter(is.na(wind_direction_am) == F) %>% 
+  filter(is.na(new_month) == F) %>% 
+  mutate(wind_direction_am = factor(wind_direction_am, levels = c("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"))) %>% 
+  filter(wind_direction_am != "NA") %>% 
+  ggplot(aes(as.factor(wind_direction_am), n)) +
+  geom_col(fill = "skyblue", color = "black", alpha = 0.55, width = 1) +
+  coord_polar(start = -pi/16) +
+  labs(title = "Morning Cardinal and Ordinal Wind Direction 1871-1896 on Maine coast", subtitle = 'Month: {round(frame_time)}                       *Based on FRB journals*', x = 'Wind Direction', y = 'Observations during Month') +
+  transition_time(new_month) +
+  enter_appear() +
+  exit_disappear() +
+  theme_bw()
+```
+
+```{r}
+all_years %>% 
+  mutate(date_mdy = mdy(date_mdy)) %>% 
+  mutate(new_month = month(date_mdy)) %>% 
+  count(wind_direction_am, new_month, sort = T) %>%
+  filter(str_detect(wind_direction_am, ",") == F) %>% 
+  mutate(wind_direction_am = case_when(wind_direction_am == "WS" ~ "SW",
+                                       wind_direction_am == "WN" ~ "NW",
+                                       wind_direction_am == "w" ~ "W",
+                                       wind_direction_am == "SWW" ~ "WSW",
+                                       wind_direction_am == "Southerly" ~ "S",
+                                       wind_direction_am == "South" ~ "S",
+                                       wind_direction_am == "south" ~ "S",
+                                       wind_direction_am == "SEE" ~ "ESE",
+                                       wind_direction_am == "NWW" ~ "WNW",
+                                       wind_direction_am == "NWN" ~ "NNW",
+                                       wind_direction_am == "North" ~ "N",
+                                       wind_direction_am == "NN" ~ "N",
+                                       wind_direction_am == "NEE" ~ "ENE",
+                                       wind_direction_am == "ES" ~ "SE",
+                                       wind_direction_am == "EN" ~ "NE",
+                                       wind_direction_am == "calm" ~ NA,
+                                       wind_direction_am == "NA" ~ NA,
+                                       wind_direction_am == "breezed up" ~ NA,
+                                       wind_direction_am == "WWN" ~ "WNW",
+                                       wind_direction_am == "WS" ~ "SW",
+                                       wind_direction_am == "WNE" ~ NA,
+                                       wind_direction_am == "NEbN" ~ "SSE", #Done to make visualization even, not for analyis
+                                       TRUE ~ wind_direction_am)) %>% 
+  filter(wind_direction_am %in% c("N", "NE", "E", "SE", "S", "SW", "W", "NW")) %>% 
+  filter(is.na(wind_direction_am) == F) %>% 
+  filter(is.na(new_month) == F) %>% 
+  mutate(wind_direction_am = factor(wind_direction_am, levels = c("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"))) %>% 
+  filter(wind_direction_am != "NA") %>% 
+  ggplot(aes(as.factor(wind_direction_am), n)) +
+  geom_col(fill = "skyblue", color = "black", alpha = 0.55, width = 1) +
+  coord_polar(start = -pi/8) +
+  labs(title = "Morning Cardinal Wind Direction 1871-1896 on Maine coast", subtitle = 'Month: {round(frame_time)}                       *Based on FRB journals*', x = 'Wind Direction', y = 'Observations during Month') +
+  transition_time(new_month) +
+  ease_aes("linear") +
+  theme_bw()
+```
+
+
+```{r pm_cardinal}
+all_years %>% 
+  mutate(date_mdy = mdy(date_mdy)) %>% 
+  mutate(new_month = month(date_mdy)) %>% 
+  count(wind_direction_pm, new_month, sort = T) %>%
+  filter(str_detect(wind_direction_pm, ",") == F) %>% 
+  mutate(wind_direction_pm = case_when(wind_direction_pm == "WS" ~ "SW",
+                                       wind_direction_pm == "WN" ~ "NW",
+                                       wind_direction_pm == "w" ~ "W",
+                                       wind_direction_pm == "SWW" ~ "WSW",
+                                       wind_direction_pm == "Southerly" ~ "S",
+                                       wind_direction_pm == "South" ~ "S",
+                                       wind_direction_pm == "south" ~ "S",
+                                       wind_direction_pm == "SEE" ~ "ESE",
+                                       wind_direction_pm == "NWW" ~ "WNW",
+                                       wind_direction_pm == "NWN" ~ "NNW",
+                                       wind_direction_pm == "North" ~ "N",
+                                       wind_direction_pm == "NN" ~ "N",
+                                       wind_direction_pm == "NEE" ~ "ENE",
+                                       wind_direction_pm == "ES" ~ "SE",
+                                       wind_direction_pm == "EN" ~ "NE",
+                                       wind_direction_pm == "calm" ~ NA,
+                                       wind_direction_pm == "NA" ~ NA,
+                                       wind_direction_pm == "breezed up" ~ NA,
+                                       wind_direction_pm == "WWN" ~ "WNW",
+                                       wind_direction_pm == "WS" ~ "SW",
+                                       wind_direction_pm == "WNE" ~ NA,
+                                       wind_direction_pm == "NEbN" ~ "SSE", #Done to make visualization even, not for analyis
+                                       TRUE ~ wind_direction_pm)) %>% 
+  filter(wind_direction_pm %in% c("N", "NE", "E", "SE", "S", "SW", "W", "NW")) %>% 
+  filter(is.na(wind_direction_pm) == F) %>% 
+  filter(is.na(new_month) == F) %>% 
+  mutate(wind_direction_pm = factor(wind_direction_pm, levels = c("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"))) %>% 
+  filter(wind_direction_pm != "NA") %>% 
+  ggplot(aes(as.factor(wind_direction_pm), n)) +
+  geom_col(fill = "skyblue", color = "black", alpha = 0.55, width = 1) +
+  coord_polar(start = -pi/8) +
+  labs(title = "Cardinal and Ordinal Wind Direction 1871-1896 on Maine coast", subtitle = 'Month: {round(frame_time)}                       *Based on FRB journals*', x = 'Wind Direction', y = 'Observations during Month') +
+  transition_time(new_month) +
+  ease_aes("linear") +
+  theme_bw()
+```
+```{r temp_am}
+all_years %>% 
+  filter(str_detect(temperature_am, ",") == F) %>% 
+  mutate(temperature_am = as.numeric(temperature_am)) %>% 
+  filter(temperature_am < 1000) %>% 
+  mutate(date_mdy = mdy(date_mdy)) %>% 
+  mutate(day_of_year = yday(date_mdy)) %>% 
+  filter(year(date_mdy) > 1500) %>% 
+  ggplot(aes(x = day_of_year, y = temperature_am)) +
+  geom_point() +
+  geom_point(data = modern_temp_data, aes(x = day_of_year, y = `TMIN (Degrees Fahrenheit)` ), color = "red", size = 0.5) +   geom_point(data = modern_temp_data, aes(x = day_of_year, y = `TMAX (Degrees Fahrenheit)` ), color = "red", size = 0.5, alpha = 0.1) +
+theme_bw() +
+labs(y = "Temperature (F)", x = "Days since start of year", title = "Temperature distribution across year in Winter Harbor, ME", subtitle = "Black = FRB records 1871-1896, Red = Daily Min and Max 2002-2025")
+```
+```{r temp_pm}
+all_years %>% 
+  filter(str_detect(temperature_pm, ",") == F) %>% 
+  mutate(temperature_pm = as.numeric(temperature_pm)) %>% 
+  filter(temperature_pm < 1000) %>% 
+  mutate(date_mdy = mdy(date_mdy)) %>% 
+  mutate(day_of_year = yday(date_mdy)) %>% 
+  filter(year(date_mdy) > 1500) %>% 
+  ggplot(aes(x = day_of_year, y = temperature_pm)) +
+  geom_point()
+```
+
+```{r temp_night}
+all_years %>% 
+  filter(str_detect(temperature_night, ",") == F) %>% 
+  mutate(temperature_night = as.numeric(temperature_night)) %>% 
+  filter(temperature_night < 1000) %>% 
+  mutate(date_mdy = mdy(date_mdy)) %>% 
+  mutate(day_of_year = yday(date_mdy)) %>% 
+  filter(year(date_mdy) > 1500) %>% 
+  ggplot(aes(x = day_of_year, y = temperature_night)) +
+  geom_point()
+```
+To try: plot all times together, color by time. If not much of interest, fill na rows by combining the three columns
+
+```{r}
+modern_temp_data <- read_csv("data/modern_temp_data.csv")
+
+modern_temp_data <- modern_temp_data %>% 
+  mutate(day_of_year = yday(mdy(Date)))
+```
+
+Harvest and sowing times, snow, specific resources, namely fish
+
+```{r}
+all_years %>% 
+  filter(str_detect(journal_entry, "Mackerel") | 
+         str_detect(journal_entry, "mackerel")) %>% 
+  ggplot(aes(x = yday(mdy(date_mdy)))) +
+    geom_histogram(color = "black", fill = "skyblue") +
+  xlim(0,365) +
+    theme_bw() +
+  labs(x = "Days since start of year", y = "Occurence",
+        title = "Mentions of `Mackerel` in FRB journals 1871-1896")
+```
+```{r}
+
+all_years %>% 
+  filter(str_detect(journal_entry, "hay")) %>% 
+ # arrange(yday(mdy(date_mdy)) %>% 
+  ggplot(aes(x = yday(mdy(date_mdy)))) +
+    geom_histogram(color = "black", fill = "skyblue") +
+  xlim(0,365) +
+  theme_bw() +
+  labs(x = "Days since start of year", y = "Occurence",
+        title = "Mentions of `Hay` in FRB journals 1871-1896")
+```
+
+```{r}
+
+all_years %>% 
+  filter(str_detect(journal_entry, "snow")) %>% 
+  arrange(yday(mdy(date_mdy))) %>% 
+ # arrange(yday(mdy(date_mdy)) %>% 
+  ggplot(aes(x = yday(mdy(date_mdy)))) +
+    geom_histogram(color = "black", fill = "skyblue") +
+  xlim(0,365) +
+  theme_bw() +
+  labs(x = "Days since start of year", y = "Occurence",
+        title = "Mentions of `Snow` in FRB journals 1871-1896")
+```
+```{r}
+
+all_years %>% 
+  filter(str_detect(journal_entry, "wind mill"))
+```
+```{r}
+all_years %>% 
+  filter(str_detect(journal_entry, "herring"))
+%>% 
+  #arrange(yday(mdy(date_mdy)))
+  %>% 
+  ggplot(aes(x = yday(mdy(date_mdy)))) +
+    geom_histogram(color = "black") +
+  xlim(0,365)
+```
+Garden
+beets 
+carrots
+turnips 
+parsnips
+potatoes
+oats
+pumpkins
+squash
+corn
+beans
+peas
+cucumber
+sage
+Cabbage
+Swiss Chard
+

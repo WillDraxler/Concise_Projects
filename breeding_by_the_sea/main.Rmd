@@ -1,0 +1,15 @@
+---
+title: "main"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+deep_7_2024 <- read.csv("data/2024_Pool_7_Deep.csv")
+deep_7_2024 <- read.csv("data/2024_Pool_7_Deep.csv")
+```
+

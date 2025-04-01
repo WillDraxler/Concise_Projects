@@ -1,0 +1,40 @@
+---
+title: "blue"
+output: html_document
+---
+
+```{r}
+library(lubridate)
+library(tidyverse)
+inat_Al <- read_tsv("0003207-250227182400228.csv")
+```
+```{r}
+inat_Al %>% 
+  mutate(eventDate = ymd(eventDate)) %>% 
+  mutate(day_of_year = (month*30 - day)) %>% 
+  group_by(stateProvince) %>% 
+  count(day_of_year) %>% 
+  ggplot(aes(day_of_year)) +
+  geom_histogram(binwidth = 5) +
+  facet_wrap(~ stateProvince, nrow = 4)
+  
+```
+```{r}
+inat_Al %>% 
+  filter(countryCode == "US") %>% 
+  mutate(eventDate = ymd(eventDate)) %>% 
+ mutate(day_of_year = ((month - 1)*30 + (30 - day))) %>%  #correct I think
+  filter(stateProvince == "Maine") %>% 
+  group_by(year) %>% 
+  count(day_of_year) %>% 
+  ggplot(aes(day_of_year, fill = year)) +
+  geom_histogram(binwidth = 5)
+```
+```{r}
+inat_Al %>% 
+  mutate(eventDate = ymd(eventDate)) %>% 
+  mutate(day_of_year = (month*30 + (30 - day))) %>% 
+  count(day_of_year) %>% 
+  ggplot(aes(day_of_year)) +
+  geom_histogram()
+```
